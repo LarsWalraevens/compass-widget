@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Development": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 6435",
+      "launchBrowser": false
+    }
+  }
+}

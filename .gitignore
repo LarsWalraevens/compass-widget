@@ -1,0 +1,7 @@
+.cr
+.vs
+bin
+obj
+*.arm.*
+*.user
+*.pubxml

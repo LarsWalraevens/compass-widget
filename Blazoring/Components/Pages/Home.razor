@@ -1,0 +1,65 @@
+﻿@page "/"
+
+@inherits LayoutComponentBase
+@using compass_widget.Components
+@using Widget.Forecast
+@using Microsoft.AspNetCore.Components
+@using System.Collections.ObjectModel
+@using Vvoids.Api.Functions.Methods
+@using Vvoids.Api.Base
+@using Newtonsoft.Json
+@inject ILogger<Home> Ilog
+@inject HttpClient Http
+
+@rendermode InteractiveServer
+
+<PageTitle>Widget compass</PageTitle>
+
+<section>
+    <h2>Planned & actual</h2>
+    <div class="d-grid align-items-start flex-wrap" style="gap: 5px; grid-template-columns: 1fr 1fr 1fr;">
+        <div>
+            @if (ForecastInstance != null)
+            {
+                <WidgetForecastComponent Instance="@ForecastInstance" />
+            }
+            <pre>@JsonConvert.SerializeObject(rawData)</pre>
+        </div>
+
+    </div>
+</section>
+
+@code {
+
+    private WidgetForecastInstance ForecastInstance;
+    private WidgetForecastService DataService = new WidgetForecastService();
+    private Methods.SelectWidgetCompassActualResult rawData = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Methods methods = new Methods();
+            rawData = await methods.SelectWidgetCompassActual(Ilog, Http, new
+            Methods.SelectWidgetCompassActualBody()
+                {
+                    VesselId = Guid.Parse("a1a6d02b-9b38-4e8d-9bd1-0cffe327f2b0").ToString()
+                });
+
+            if (rawData?.Condition == HttpsStatus.Success)
+            {
+                ForecastInstance = DataService.GetForecastInstanceFromForecastData(rawData);
+                ForecastInstance.DiameterInPx = 175;
+            }
+            else
+            {
+                Ilog.LogError($"Failed to fetch forecast data.");
+            }
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching: {ex.Message}");
+        }
+    }
+}

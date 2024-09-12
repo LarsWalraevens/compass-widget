@@ -1,0 +1,278 @@
+@namespace compass_widget.Components
+
+@using Widget.Forecast
+
+@if (ShownMainItem != null)
+{
+        @if (IsVessel)
+        {
+            <div class="compass-map-vessel-waypoint @(ShownMainItem.IsActual ? "compass-map-vessel-waypoint-actual" : null)"
+                style="transform: rotate(@(ShownMainItem.Degree)deg)" />
+        }
+        else
+        {
+            <div class="compass-map-target-waypoint @(ShownMainItem.IsActual ? "compass-map-target-waypoint-actual" : null)"
+                style="@GenerateTargetWaypointSizeStyle(ShownMainItem.Degree, ShownMainItem.IsActual, ShownMainItem.ValueInPercent)">
+                <span class="arrow" style="@GenerateTargetWaypointArrowStyle(ShownMainItem.ValueInPercent)"></span>
+            </div>
+        }
+        @* CLICKABLE DOT - OPTIONS TO TOGGLE BETWEEN LAYERS *@
+        @* increase height in container style attr if you want the dots to be further apart *@
+            <div class="compass-map-target-dot-button-container"
+                style="height: calc(53% + @(Instance.TargetDotSizeInPx/2)px); transform: rotate(@(DegreesItemsMiddle != 0 ? DegreesItemsMiddle : ShownMainItem.Degree)deg); transform-origin: 0% 100%; width: 2px; left:calc(50%); z-index: @(Instance.FocusedItem != null && Instance.FocusedItem == Item ? 100 : 30) !important;">
+                <div @onclick="ChangeFocusItem" class="compass-map-target-dot-button" style="transform: rotate(-@(DegreesItemsMiddle != 0 ? DegreesItemsMiddle : ShownMainItem.Degree)deg);" >
+                    <div  class="compass-map-target-dot-button-wrapper" style="height: @(Instance.TargetDotSizeInPx)px; width: @(Instance.TargetDotSizeInPx)px; border: @(Instance.FocusedItem != null && Instance.FocusedItem == Item ? "2px solid white" : "unset"); ">
+                    <div class="compass-map-target-dot-button-content" style="pointer-events: none;">
+                        <i class="bi @(ShownMainItem.Type.Icon)" style="font-size: @(Instance.TargetDotSizeInPx - (Instance.TargetDotSizeInPx / 1.7))px;" />
+                        <div class="compass-map-target-dot-button-indicators">
+                            <span id="planned" class="@(IsActivePlanned ? "active" : null)"
+                                style="width: @(Instance.TargetDotSizeInPx/6)px; height: @(Instance.TargetDotSizeInPx/6)px; " />
+                            <span id="actual" class="@(IsActiveActual ? "active" : null)"
+                                style="width: @(Instance.TargetDotSizeInPx/6)px; height: @(Instance.TargetDotSizeInPx/6)px; " />
+                        </div>
+                    </div>
+                    </div>
+                @if (OtherOptions.Count > 0)
+                {
+                    <button class="compass-map-dot-button-options" style="left: @(DegreesItemsMiddle > 180 ? "-17%" : "67%")">
+                        <i class="bi bi-list" style="font-size:1.1rem;"></i>
+                    </button>    
+                }
+                @* TOOLTIP *@
+               @if(Instance.FocusedItem == Item) {
+                 <div class="compass-map-target-dot-button-tooltip">
+                    <span class="bi bi-x" style="position: absolute; top: 1px; right: 4px; font-size: 1.2rem; cursor:pointer;"></span>
+                    <p class="fw-bold mb-1">@ShownMainItem.Type.Name</p>
+                        <ul class="list-unstyle pl-4 @(OtherOptions.Count > 0 ? "mb-3" : "mb-1")">
+                            <li>@(ShownMainItem.IsActual ? "Actual" : "Planned"): @ShownMainItem.ValueText</li>
+                            @{
+                                if (SameTypeInOptions != null)
+                                {
+                                    <li>@(SameTypeInOptions.IsActual ? "Actual" : "Planned"): @SameTypeInOptions.ValueText</li>
+                                }
+                            }
+                        </ul>
+                        @if (OtherOptions.Count > 0)
+                        {
+                            <p class="fw-bold mb-1">Other options</p>                
+                                <ul class="list-unstyled mb-1">
+                                @{
+                                    if (OtherOptions.Count > 0)
+                                    {
+                                        foreach (WidgetForecastItem MyOtherOption in OtherOptions.GroupBy(x => x.Type.Name).Select(x => x.First()))
+                                        {
+                                            <li style="cursor:pointer; text-decoration:underline;" @onclick="e=> ChangeToOption(MyOtherOption)">@(MyOtherOption.Type.Name)</li>
+                                        }
+                                    } 
+                                }
+                                </ul>
+                        }
+                    </div>
+               }
+                </div>
+            </div>
+
+        @if (SameTypeInOptions != null)
+        {
+            if (SameTypeInOptions.Type.Name == "Speed")
+            {        
+                <div class="compass-map-vessel-waypoint @(SameTypeInOptions.IsActual ? "compass-map-vessel-waypoint-actual" : null)"
+                    style="transform: rotate(@(SameTypeInOptions.Degree)deg)" />
+            }
+            else
+            {
+                <div class="compass-map-target-waypoint @(SameTypeInOptions.IsActual ? "compass-map-target-waypoint-actual" : null)"
+                    style="@GenerateTargetWaypointSizeStyle(SameTypeInOptions.Degree, SameTypeInOptions.IsActual, SameTypeInOptions.ValueInPercent)">
+                    <span class="arrow" style="@GenerateTargetWaypointArrowStyle(SameTypeInOptions.ValueInPercent)"></span>
+                </div>
+            }
+        }
+}
+
+
+@code {
+    [Parameter] public bool IsVessel { get; set; }
+
+    [Parameter] public List<List<WidgetForecastItem>> ForecastGroupedItems { get; set; }
+
+    [Parameter] public EventCallback<List<List<WidgetForecastItem>>> SetForecastGroupedItems { get; set; }
+    [Parameter] public EventCallback<WidgetForecastItem> ToggleFocusItem { get; set; }
+
+    [Parameter] public WidgetForecastInstance Instance { get; set; }
+
+    [Parameter] public WidgetForecastItem Item { get; set; }
+
+    [Parameter] public List<WidgetForecastItem> Options { get; set; }
+
+    public List<WidgetForecastItem> OtherOptions = new List<WidgetForecastItem>();
+
+    private bool IsActiveActual = false;
+    private bool IsActivePlanned = false;
+
+    private decimal MaxPercentage = 61;
+    private decimal MinPercentage = 15;
+
+    private async Task ChangeFocusItem() {
+        if(Instance.FocusedItem == Item) {
+        await ToggleFocusItem.InvokeAsync(null);
+        } else {
+        await ToggleFocusItem.InvokeAsync(Item);
+        }
+        
+    }
+
+    private WidgetForecastItem ShownMainItem { get; set; }
+
+    private WidgetForecastItem SameTypeInOptions = null;
+
+    private decimal DegreesItemsMiddle = 0;
+
+    private async Task ChangeToOption(WidgetForecastItem item)
+    {
+        ShownMainItem = item;
+
+        List<WidgetForecastItem> availableOptions = new List<WidgetForecastItem>(Options.Concat(new WidgetForecastItem[] { Item }));
+        List<List<WidgetForecastItem>> CopyOfForecastGroupedItems = new List<List<WidgetForecastItem>>(ForecastGroupedItems);
+
+        OtherOptions = availableOptions.Where(i => i.Type != item.Type && i.IsActual != item.IsActual).ToList();
+        ShownMainItem = item;
+
+        // Set focused item at the first index in the ForecastGroupedItems
+        int indexOfGroup = CopyOfForecastGroupedItems.FindIndex(group => group.Contains(item));
+        Console.WriteLine("indexOfGroup: " + indexOfGroup);
+
+
+        if (indexOfGroup != -1)
+        {
+            List<WidgetForecastItem> group = CopyOfForecastGroupedItems[indexOfGroup];
+            group.Remove(item);
+            group.Insert(0, item);
+            CopyOfForecastGroupedItems[indexOfGroup] = group;
+        }
+
+
+        // Calculate middle degrees when options are found 
+        if (OtherOptions.Count > 0)
+        {
+            List<decimal> listOfOffsets = new List<decimal>([Item.Degree]);
+
+            foreach (WidgetForecastItem oItem in OtherOptions)
+            {
+                // Also check if actual or planned are included in this waypoint item if its the same type of the main item
+                if (oItem.Type == item.Type && item.IsActual == true && IsActiveActual == false)
+                {
+                    IsActiveActual = true;
+                }
+                else
+                {
+                    IsActiveActual = false;
+                }
+                if (oItem.Type == item.Type && item.IsActual == false && IsActivePlanned == false)
+                {
+                    IsActivePlanned = true;
+                }
+                else
+                {
+                    IsActivePlanned = false;
+                }
+                if (oItem.Type == item.Type)
+                {
+                    listOfOffsets.Add(item.Degree);
+                }
+            }
+            DegreesItemsMiddle = listOfOffsets.Average();
+        }
+
+        await SetForecastGroupedItems.InvokeAsync(CopyOfForecastGroupedItems);
+    }
+
+    protected override void OnParametersSet()
+    {
+        SameTypeInOptions = Options
+            .Where(i => i.Type == Item.Type)
+            .FirstOrDefault();
+
+        // Calculate middle degrees when options are found 
+        if (Options.Count > 0)
+        {
+            List<decimal> listOfOffsets = new List<decimal>([Item.Degree]);
+
+            foreach (WidgetForecastItem item in Options)
+            {
+                // Also check if actual or planned are included in this waypoint item if its the same type of the main item
+                if (Item.Type == item.Type && item.IsActual == true && IsActiveActual == false)
+                {
+                    IsActiveActual = true;
+                }
+                if (Item.Type == item.Type && item.IsActual == false && IsActivePlanned == false)
+                {
+                    IsActivePlanned = true;
+                }
+                if (Item.Type != item.Type)
+                {
+                    OtherOptions.Add(item);
+                }
+                else
+                {
+                    listOfOffsets.Add(item.Degree);
+                }
+            }
+            DegreesItemsMiddle = listOfOffsets.Average();
+        }
+        // Make sure actives are set on main item
+        if (Item.IsActual == true && IsActiveActual == false)
+        {
+            IsActiveActual = true;
+        }
+        if (Item.IsActual == false && IsActivePlanned == false)
+        {
+            IsActivePlanned = true;
+        }
+
+        ShownMainItem = Item;
+        StateHasChanged();
+
+    }
+
+    private string GenerateTargetWaypointSizeStyle(decimal degrees, bool isActual, decimal percentage)
+    {
+        string color = isActual ? "var(--color-actual)" : "var(--color-planned)";
+        decimal percent;
+
+        if (percentage <= MinPercentage)
+        {
+            percent = MinPercentage;
+        }
+        else if (percentage >= MaxPercentage)
+        {
+            percent = MaxPercentage;
+        }
+        else
+        {
+            percent = percentage;
+        }
+
+        return $"background-image: linear-gradient(to top, rgba(255, 255, 255, 0) {100 - percent}%, {color} {100 - percent}%) !important; transform: rotate({degrees}deg); z-index:10;";
+    }
+    private string GenerateTargetWaypointArrowStyle(decimal percentage)
+    {
+        decimal percent;
+
+        if (percentage <= MinPercentage)
+        {
+            percent = MinPercentage;
+        }
+        else if (percentage >= MaxPercentage)
+        {
+            percent = MaxPercentage;
+        }
+        else
+        {
+            percent = percentage;
+        }
+
+        return $"top: calc({percent}%);";
+    }
+
+
+}

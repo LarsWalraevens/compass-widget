@@ -1,0 +1,92 @@
+@namespace compass_widget.Components
+
+<style>
+    .compass-vessel {
+        position: relative;
+        width: 7%;
+        height: 28%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        z-index: 10;
+    }
+
+    .compass-vessel.compass-vessel-actual {
+        z-index: 11;
+
+    }
+
+    .compass-map .compass-map-inner {
+        width: 28%;
+        min-height: 28%;
+
+        z-index: 3;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border-radius: 100%;
+        flex-grow: 1;
+        box-shadow: inset 0px 0px 0px 2px rgba(1, 1, 1, 1%);
+    }
+
+    .compass-map .compass-map-positioning {
+        width: 55%;
+        min-height: 55%;
+
+        z-index: 2;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border-radius: 100%;
+        background: transparent;
+        flex-grow: 1;
+    }
+
+    .compass-vessel.compass-vessel-actual .compass-vessel-top,
+    .compass-vessel.compass-vessel-actual .compass-vessel-base {
+        background-color: var(--color-actual) !important;
+        opacity: 0.5;
+    }
+
+    .compass-vessel .compass-vessel-top {
+        position: absolute;
+        display: inline-block;
+        width: 100%;
+        height: 30%;
+        top: 0%;
+        border-top-left-radius: 1000%;
+        border-top-right-radius: 1000%;
+        background-color: white;
+    }
+
+    .compass-vessel .compass-vessel-base {
+        position: absolute;
+        bottom: 0%;
+        height: 70%;
+        width: 100%;
+        border-bottom-left-radius: 10%;
+        border-bottom-right-radius: 10%;
+        background-color: white;
+    }
+</style>
+
+
+<div class="compass-vessel @(IsActual == true ? "compass-vessel-actual" : null)"
+    style="transform: translate(-50%, -50%) rotate(@(Degree)deg);">
+    <span class="compass-vessel-base" />
+    <span class="compass-vessel-top" />
+</div>
+
+@code {
+    [Parameter] public decimal Degree { get; set; }
+
+    [Parameter] public bool IsActual { get; set; }
+}

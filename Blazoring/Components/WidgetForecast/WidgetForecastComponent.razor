@@ -1,0 +1,131 @@
+@namespace compass_widget.Components
+
+@using Microsoft.AspNetCore.Components
+@using Widget.Forecast
+@using System.Collections.ObjectModel
+
+@if (Instance != null && Instance.Items != null && Instance.Items.Count > 0)
+{
+    <div class="widget-forecast" style="display: flex;">
+        <WidgetForecastMap DiameterInPx="Instance.DiameterInPx" DegreePositioning="Instance.DegreePositioning"
+            DegreeBearing="Instance.DegreeBearing" DepthValueInMeter="Instance.DepthValueInMeter"
+            PositioningIsWarning="Instance.PositioningIsWarning">
+            @foreach (List<WidgetForecastItem> group in ForecastGroupedItems)
+            {
+                WidgetForecastItem mainItem = group.FirstOrDefault();
+                List<WidgetForecastItem> OtherOptions = group.Where(i => i != mainItem && i.IsVisible == true).ToList();
+
+                if (mainItem != null)
+                {
+                    <WidgetForecastWaypoint IsVessel="@(mainItem.Type.Name == "Speed")" Instance="@Instance" Item="@mainItem"
+                        Options="@(OtherOptions)" ForecastGroupedItems="@ForecastGroupedItems"
+                        SetForecastGroupedItems="SetForecastGroupedItems" ToggleFocusItem="@ToggleFocusItem" />
+                }
+            }
+            @foreach (List<WidgetForecastItem> group in ForecastGroupedItems)
+            {
+                foreach (WidgetForecastItem item in group)
+                {
+                    if (item.Type.Name == "Speed")
+                    {
+                        <WidgetForecastVessel Degree="@item.Degree" IsActual="@item.IsActual" />
+                    }
+                }
+            }
+        </WidgetForecastMap>
+    </div>
+}
+
+@code {
+    [Parameter] public WidgetForecastInstance Instance { get; set; }
+
+    private async Task ToggleFocusItem(WidgetForecastItem _item)
+    {
+        Instance.SetFocusedForecastItem(_item);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public List<List<WidgetForecastItem>> ForecastGroupedItems { get; set; }
+
+    public async Task SetForecastGroupedItems(List<List<WidgetForecastItem>> items)
+    {
+        ForecastGroupedItems = items;
+        await InvokeAsync(StateHasChanged);
+    }
+    private void FilterItems(string typeName, bool isVisible)
+    {
+        Console.WriteLine("FilterItems: " + typeName + ", " + isVisible);
+        foreach (var group in ForecastGroupedItems)
+        {
+            foreach (var item in group)
+            {
+                if (item.Type.Name == typeName)
+                {
+                    item.IsVisible = isVisible;
+                }
+            }
+        }
+    }
+
+    private bool IsTypeVisible(string typeName)
+    {
+        return ForecastGroupedItems.SelectMany(g => g).Any(item => item.Type.Name == typeName && item.IsVisible);
+    }
+
+    // Loop through items to group if degree value is in the same margin
+    protected override void OnInitialized()
+    {
+        if (Instance.Items == null || Instance.Items.Count == 0) return;
+        ForecastGroupedItems = new List<List<WidgetForecastItem>>();
+        List<WidgetForecastItem> currentGroup = new List<WidgetForecastItem>();
+        decimal margin = (decimal)Instance.DiameterInPx / 2.7M * (decimal)Instance.TargetDotSizeInPx /
+        (decimal)Instance.DiameterInPx;
+
+        // Order items by Degree with wrap-around logic
+        var myItems = Instance.Items.OrderBy(x => x.Degree < margin ? x.Degree + 360 : x.Degree)
+        .ThenBy(x => x.Type.Name != "Speed")
+        .ToList();
+
+        foreach (var item in myItems)
+        {
+            if (currentGroup.Count == 0 || IsWithinMargin(currentGroup.Last().Degree, item.Degree, margin))
+            {
+                currentGroup.Add(item);
+            }
+            else
+            {
+                ForecastGroupedItems.Add(currentGroup);
+                currentGroup = new List<WidgetForecastItem> { item };
+            }
+        }
+
+        // Add the last group if it has items
+        if (currentGroup.Any())
+        {
+            ForecastGroupedItems.Add(currentGroup);
+        }
+
+        // Ensure that each group is ordered with "Speed" items first
+        for (int i = 0; i < ForecastGroupedItems.Count; i++)
+        {
+            ForecastGroupedItems[i] = ForecastGroupedItems[i].OrderBy(x => x.Type.Name != "Speed").ThenBy(x => x.Degree).ToList();
+        }
+
+        // Ensure the group containing "Speed" items is at the top
+        ForecastGroupedItems = ForecastGroupedItems.OrderByDescending(g => g.Any(item => item.Type.Name == "Speed"))
+        .ThenBy(g => g.Min(item => item.Degree))
+        .ToList();
+    }
+
+    // Helper method to determine if two degrees are within the margin, considering wrapping
+    private bool IsWithinMargin(decimal degree1, decimal degree2, decimal margin)
+    {
+        decimal difference = Math.Abs(degree1 - degree2);
+        if (difference > 180)
+        {
+            difference = 360 - difference;
+        }
+        return difference <= margin;
+    }
+
+}

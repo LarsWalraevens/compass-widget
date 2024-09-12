@@ -1,0 +1,45 @@
+﻿Visual Studio Settings:
+
+You should consider enabling word wrap if you often scroll horizontally.
+Tools > Options > Text Editor > All languages > Enable word wrap
+
+
+Functions explanation:
+
+Route link extension to be called: ...api/<Route>
+<Route> is specified for example as '...Route = "custom/{_id:<constraint>}/{_name?}")], ..., int _id, string _name'
+Thus being called as  ...api/custom/9/Vince
+                      ...api/custom/9
+                      ...api/custom
+Precedant variables are required to access the latter ones even when both are optional
+Adding a '?' applies that it is a pseudo-optional variable: 'pseudo' due to the precedant rule
+Multiple constraints can be applied to a parameter by adding a ':' after the variable name as a seperator for each constraint
+A list of constraint options can be found at:
+https://learn.microsoft.com/en-us/aspnet/web-api/overview/web-api-routing-and-actions/attribute-routing-in-web-api-2#route-constraints
+Every parameter must be defined after the HTTPTrigger attribute, parameter names must be exact as in the attribute.
+
+<OtherParameters>
+HTTPRequest       => Used to retrieve the body of the request
+ILogger           => Used to debug and log
+ExecutionContext  => Used to get the functions runtime path
+
+
+Useful regexes:
+
+:regex(^(default|home|business|office|all)$)
+=> The '^' and '$' indicate the start and end of the item
+=> The inner '()' defines a section
+=> The '|' indicates an OR operation
+==> Simply define the allowed words for this route to be called
+
+
+Schedules:
+
+*/15 * * * * * => Every 15 seconds
+*/5 * 14-18 1,2,3,4,5,6,7 1 Mon,Tue => All cron types below in an example
+
+*/ == Modulo
+- == Range
+, == Multiple
+Number (hour is max 23 | second is max 59 | ...)
+Letters (3 letters | 5th star is months, 6th star is daysofweek | English notation)

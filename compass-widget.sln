@@ -1,0 +1,51 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.002.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blazoring", "Blazoring\Blazoring.csproj", "{839AF278-28D2-4712-A1EE-65116322A3D5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Razer", "Development\Razer.csproj", "{1F861F18-8A8F-4D4D-9C01-B0A00B895312}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Development", "Development", "{9A74C61F-AACC-4F45-B54C-2133B76F6BDE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "obj", "obj", "{557B863A-A45F-45B1-9134-9389CD333C2E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Debug", "Debug", "{EC324A8B-0C40-4527-A175-1F8B20F1CC8F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "net8.0", "net8.0", "{864F4B49-21B9-4E2F-B793-251B75142CF5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkerExtensions", "Development\obj\Debug\net8.0\WorkerExtensions\WorkerExtensions.csproj", "{3A6D1F88-4A4D-4B7F-80B2-687138C976C1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{839AF278-28D2-4712-A1EE-65116322A3D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{839AF278-28D2-4712-A1EE-65116322A3D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{839AF278-28D2-4712-A1EE-65116322A3D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{839AF278-28D2-4712-A1EE-65116322A3D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F861F18-8A8F-4D4D-9C01-B0A00B895312}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F861F18-8A8F-4D4D-9C01-B0A00B895312}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F861F18-8A8F-4D4D-9C01-B0A00B895312}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F861F18-8A8F-4D4D-9C01-B0A00B895312}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A6D1F88-4A4D-4B7F-80B2-687138C976C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A6D1F88-4A4D-4B7F-80B2-687138C976C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A6D1F88-4A4D-4B7F-80B2-687138C976C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A6D1F88-4A4D-4B7F-80B2-687138C976C1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{557B863A-A45F-45B1-9134-9389CD333C2E} = {9A74C61F-AACC-4F45-B54C-2133B76F6BDE}
+		{EC324A8B-0C40-4527-A175-1F8B20F1CC8F} = {557B863A-A45F-45B1-9134-9389CD333C2E}
+		{864F4B49-21B9-4E2F-B793-251B75142CF5} = {EC324A8B-0C40-4527-A175-1F8B20F1CC8F}
+		{3A6D1F88-4A4D-4B7F-80B2-687138C976C1} = {864F4B49-21B9-4E2F-B793-251B75142CF5}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0A617295-6E94-451F-95E2-EE8DBEC88A98}
+	EndGlobalSection
+EndGlobal
